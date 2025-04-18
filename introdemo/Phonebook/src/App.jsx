@@ -55,7 +55,7 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
       <div>
         filter shown with:
         <input 
@@ -64,7 +64,7 @@ const App = () => {
         />
       </div>
 
-      <h3>Add new</h3>
+      <h2>Add new</h2>
       <form onSubmit={addPerson}>
         <div>
           name: 
@@ -85,7 +85,7 @@ const App = () => {
         </div>
       </form>
 
-      <h3>Numbers</h3>
+      <h2>Numbers</h2>
       <ul>
         {personsToShow.map(person => (
           <li key={person.id}>
