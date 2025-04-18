@@ -43,7 +43,7 @@ const App = (props) => {
       </ul>
       <form onSubmit={addNote}>
         <input 
-          valeu={newNote} 
+          value={newNote} 
           onChange={handleNoteChange}
         />
         <button type="submit">save</button>
