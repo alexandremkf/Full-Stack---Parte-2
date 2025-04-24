@@ -7,6 +7,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+  // Comentário para mostrar que fiz o 12.
   useEffect(() => {
     console.log('effect')
     axios
