@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import personService from './services/persons'
+import Person from './components/Person'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -15,6 +16,21 @@ const App = () => {
         setPersons(initialPersons)
       })
   }, [])
+
+  const del = (id, name) => {
+    const confirmDelete = window.confirm(`Delete ${name} ?`)
+    if (!confirmDelete) return
+  
+    personService
+      .remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+      .catch(error => {
+        alert(`the person '${name}' was already deleted from server`)
+        setPersons(persons.filter(person => person.id !== id))
+      })
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -106,9 +122,11 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
         {personsToShow.map(person => (
-          <li key={person.id}>
-            {person.name} {person.number}
-          </li>
+          <Person 
+          key={person.id} 
+          person={person} 
+          handleDelete={del} 
+        />
         ))}
       </ul>
     </div>
