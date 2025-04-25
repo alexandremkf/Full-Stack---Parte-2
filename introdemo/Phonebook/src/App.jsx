@@ -35,11 +35,32 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
 
-    const nameExists = persons.some(person => person.name === newName)
-    if (nameExists) {
-      alert(`${newName} is already added to phonebook`)
+    const existingPerson = persons.find(person => person.name === newName)
+
+    if (existingPerson) {
+      const confirmUpdate = window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      )
+
+      if (confirmUpdate) {
+        const updatedPerson = { ...existingPerson, number: newNumber }
+
+        personService
+          .update(existingPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person =>
+              person.id !== existingPerson.id ? person : returnedPerson
+            ))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => {
+            alert(`Information of ${newName} has already been removed from server`)
+            setPersons(persons.filter(p => p.id !== existingPerson.id))
+          })
+      }
       return
-    }
+    } 
 
     const personObject = {
       name: newName,
@@ -47,22 +68,15 @@ const App = () => {
       id: crypto.randomUUID(),
     }
 
-    axios
-    .post('http://localhost:3001/persons', personObject)
-    .then(response => {
-      setPersons(prevPersons => [...prevPersons, response.data])
-      setNewName('')
-      setNewNumber('')
-    })
-    .catch(error => {
-      console.error('Erro ao adicionar pessoa:', error)
-    })
-
     personService
       .create(personObject)
-      .then(returnPerson => {
-        setPersons(persons.concat(returnPerson))
+      .then(returnedPerson => {
+        setPersons([...persons, returnedPerson])
         setNewName('')
+        setNewNumber('')
+      })
+      .catch(error => {
+        console.error('Erro ao adicionar pessoa:', error)
       })
   }
 
