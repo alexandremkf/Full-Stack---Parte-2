@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import personService from './services/persons'
 import Person from './components/Person'
-import { AddedNotification, ChangedNotification } from './components/Notifications'
+import Notification from './components/Notifications'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -11,6 +11,8 @@ const App = () => {
   const [filter, setFilter] = useState('')
   const [addedMessage, setAddedMessage] = useState(null)
   const [changedMessage, setChangedMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [messageType, setMessageType] = useState('success')
 
   useEffect(() => {
     personService
@@ -64,7 +66,11 @@ const App = () => {
             }, 5000)
           })
           .catch(error => {
-            alert(`Information of ${newName} has already been removed from server`)
+            setAddedMessage(`Information of ${newName} has already been removed from server`)
+            setMessageType('error')
+            setTimeout(() => {
+              setErrorMessage(null)
+            }, 5000)
             setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
       }
@@ -119,10 +125,11 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <AddedNotification message={addedMessage} />
-      <ChangedNotification message={changedMessage} />
+      <Notification message={addedMessage} type={messageType} />
+      <Notification message={changedMessage} type="success"/>
+      <Notification message={errorMessage} type="error" />
       <div>
-        filter shown with:
+        Filter shown with:
         <input 
           value={filter}
           onChange={handleFilterChange}
@@ -132,21 +139,21 @@ const App = () => {
       <h2>Add new</h2>
       <form onSubmit={addPerson}>
         <div>
-          name: 
+          Name: 
           <input 
             value={newName} 
             onChange={handlePersonChange}
           />
         </div>
         <div>
-          number:
+          Number:
           <input 
           value={newNumber}
           onChange={handleNumberChange}
           />
         </div>
         <div>
-          <button type="submit">add</button>
+          <button type="submit">Add</button>
         </div>
       </form>
 

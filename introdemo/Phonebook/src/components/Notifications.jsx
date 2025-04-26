@@ -1,25 +1,14 @@
-export const AddedNotification = ({ message }) => {
+const Notification = ({ message, type }) => {
     if (message === null) {
-        return null
+      return null
     }
-
+    
     return (
-        <div className="added">
-            {message}
-        </div>
+      <div className={type == 'error' ? 'error' : 'success'}>
+        {message}
+      </div>
     )
-}
-
-export const ChangedNotification = ({ message }) => {
-    if (message === null) {
-        return null
-    }
-
-    return (
-        <div className="changed">
-            {message}
-        </div>
-    )
-}
-
-export default AddedNotification; ChangedNotification
+  }
+  
+  export default Notification
+  
