@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import personService from './services/persons'
 import Person from './components/Person'
+import { AddedNotification, ChangedNotification } from './components/Notifications'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [addedMessage, setAddedMessage] = useState(null)
+  const [changedMessage, setChangedMessage] = useState(null)
 
   useEffect(() => {
     personService
@@ -27,7 +30,7 @@ const App = () => {
         setPersons(persons.filter(person => person.id !== id))
       })
       .catch(error => {
-        alert(`the person '${name}' was already deleted from server`)
+        alert(`The person '${name}' was already deleted from server`)
         setPersons(persons.filter(person => person.id !== id))
       })
   }
@@ -53,6 +56,12 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
+            setChangedMessage(
+              `Updated number for '${returnedPerson.name}'`
+            )
+            setTimeout(() => {
+              setChangedMessage(null)
+            }, 5000)
           })
           .catch(error => {
             alert(`Information of ${newName} has already been removed from server`)
@@ -74,6 +83,12 @@ const App = () => {
         setPersons([...persons, returnedPerson])
         setNewName('')
         setNewNumber('')
+        setAddedMessage(
+          `Added '${returnedPerson.name}'`
+        )
+        setTimeout(() =>{
+          setAddedMessage(null)
+        }, 5000)
       })
       .catch(error => {
         console.error('Erro ao adicionar pessoa:', error)
@@ -104,6 +119,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
+      <AddedNotification message={addedMessage} />
+      <ChangedNotification message={changedMessage} />
       <div>
         filter shown with:
         <input 
