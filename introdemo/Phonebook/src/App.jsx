@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import personService from './services/persons'
 import Person from './components/Person'
 import Notification from './components/Notifications'
@@ -9,10 +8,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
-  const [addedMessage, setAddedMessage] = useState(null)
-  const [changedMessage, setChangedMessage] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [messageType, setMessageType] = useState('success')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     personService
@@ -22,17 +18,23 @@ const App = () => {
       })
   }, [])
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type })
+    setTimeout(() => setNotification(null), 5000)
+  }
+
   const del = (id, name) => {
     const confirmDelete = window.confirm(`Delete ${name} ?`)
     if (!confirmDelete) return
-  
+
     personService
       .remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id))
+        showNotification(`Deleted '${name}'`, 'success')
       })
       .catch(error => {
-        alert(`The person '${name}' was already deleted from server`)
+        showNotification(`The person '${name}' was already deleted from server`, 'error')
         setPersons(persons.filter(person => person.id !== id))
       })
   }
@@ -58,24 +60,15 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
-            setChangedMessage(
-              `Updated number for '${returnedPerson.name}'`
-            )
-            setTimeout(() => {
-              setChangedMessage(null)
-            }, 5000)
+            showNotification(`Updated number for '${returnedPerson.name}'`, 'success')
           })
           .catch(error => {
-            setAddedMessage(`Information of ${newName} has already been removed from server`)
-            setMessageType('error')
-            setTimeout(() => {
-              setErrorMessage(null)
-            }, 5000)
+            showNotification(`Information of ${newName} has already been removed from server`, 'error')
             setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
       }
       return
-    } 
+    }
 
     const personObject = {
       name: newName,
@@ -89,35 +82,20 @@ const App = () => {
         setPersons([...persons, returnedPerson])
         setNewName('')
         setNewNumber('')
-        setAddedMessage(
-          `Added '${returnedPerson.name}'`
-        )
-        setTimeout(() =>{
-          setAddedMessage(null)
-        }, 5000)
+        showNotification(`Added '${returnedPerson.name}'`, 'success')
       })
       .catch(error => {
         console.error('Erro ao adicionar pessoa:', error)
+        showNotification('Failed to add person', 'error')
       })
   }
 
-  const handlePersonChange = (event) => {
-    console.log(event.target.value)
-    setNewName(event.target.value)
-  }
-
-  const handleNumberChange = (event) => {
-    console.log(event.target.value)
-    setNewNumber(event.target.value)
-  }
-
-  const handleFilterChange = (event) => {
-    console.log(event.target.value)
-    setFilter(event.target.value)
-  }
+  const handlePersonChange = (event) => setNewName(event.target.value)
+  const handleNumberChange = (event) => setNewNumber(event.target.value)
+  const handleFilterChange = (event) => setFilter(event.target.value)
 
   const personsToShow = filter
-    ? persons.filter(person => 
+    ? persons.filter(person =>
         person.name.toLowerCase().startsWith(filter.toLowerCase())
       )
     : persons
@@ -125,9 +103,8 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <Notification message={addedMessage} type={messageType} />
-      <Notification message={changedMessage} type="success"/>
-      <Notification message={errorMessage} type="error" />
+      <Notification message={notification?.message} type={notification?.type} />
+
       <div>
         Filter shown with:
         <input 
@@ -139,7 +116,7 @@ const App = () => {
       <h2>Add new</h2>
       <form onSubmit={addPerson}>
         <div>
-          Name: 
+          Name:
           <input 
             value={newName} 
             onChange={handlePersonChange}
@@ -148,8 +125,8 @@ const App = () => {
         <div>
           Number:
           <input 
-          value={newNumber}
-          onChange={handleNumberChange}
+            value={newNumber}
+            onChange={handleNumberChange}
           />
         </div>
         <div>
@@ -161,10 +138,10 @@ const App = () => {
       <ul>
         {personsToShow.map(person => (
           <Person 
-          key={person.id} 
-          person={person} 
-          handleDelete={del} 
-        />
+            key={person.id} 
+            person={person} 
+            handleDelete={del} 
+          />
         ))}
       </ul>
     </div>
