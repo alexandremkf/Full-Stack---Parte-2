@@ -11,11 +11,9 @@ const App = () => {
   const [notification, setNotification] = useState(null)
 
   useEffect(() => {
-    personService
-      .getAll()
-      .then(initialPersons => {
-        setPersons(initialPersons)
-      })
+    personService.getAll().then(initialPersons => {
+      setPersons(initialPersons)
+    })
   }, [])
 
   const showNotification = (message, type = 'success') => {
@@ -24,16 +22,15 @@ const App = () => {
   }
 
   const del = (id, name) => {
-    const confirmDelete = window.confirm(`Delete ${name} ?`)
-    if (!confirmDelete) return
+    if (!window.confirm(`Delete ${name}?`)) return
 
     personService
       .remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id))
-        showNotification(`Deleted '${name}'`, 'success')
+        showNotification(`Deleted '${name}'`)
       })
-      .catch(error => {
+      .catch(() => {
         showNotification(`The person '${name}' was already deleted from server`, 'error')
         setPersons(persons.filter(person => person.id !== id))
       })
@@ -42,8 +39,7 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
 
-    const existingPerson = persons.find(person => person.name === newName)
-
+    const existingPerson = persons.find(p => p.name === newName)
     if (existingPerson) {
       const confirmUpdate = window.confirm(
         `${newName} is already added to phonebook, replace the old number with a new one?`
@@ -55,14 +51,12 @@ const App = () => {
         personService
           .update(existingPerson.id, updatedPerson)
           .then(returnedPerson => {
-            setPersons(persons.map(person =>
-              person.id !== existingPerson.id ? person : returnedPerson
-            ))
+            setPersons(persons.map(p => p.id !== existingPerson.id ? p : returnedPerson))
             setNewName('')
             setNewNumber('')
-            showNotification(`Updated number for '${returnedPerson.name}'`, 'success')
+            showNotification(`Updated number for '${returnedPerson.name}'`)
           })
-          .catch(error => {
+          .catch(() => {
             showNotification(`Information of ${newName} has already been removed from server`, 'error')
             setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
@@ -72,8 +66,7 @@ const App = () => {
 
     const personObject = {
       name: newName,
-      number: newNumber,
-      id: crypto.randomUUID(),
+      number: newNumber
     }
 
     personService
@@ -82,22 +75,20 @@ const App = () => {
         setPersons([...persons, returnedPerson])
         setNewName('')
         setNewNumber('')
-        showNotification(`Added '${returnedPerson.name}'`, 'success')
+        showNotification(`Added '${returnedPerson.name}'`)
       })
       .catch(error => {
-        console.error('Erro ao adicionar pessoa:', error)
-        showNotification('Failed to add person', 'error')
+        const msg = error.response?.data?.error || 'Failed to add person'
+        showNotification(msg, 'error')
       })
   }
 
-  const handlePersonChange = (event) => setNewName(event.target.value)
-  const handleNumberChange = (event) => setNewNumber(event.target.value)
-  const handleFilterChange = (event) => setFilter(event.target.value)
+  const handlePersonChange = (e) => setNewName(e.target.value)
+  const handleNumberChange = (e) => setNewNumber(e.target.value)
+  const handleFilterChange = (e) => setFilter(e.target.value)
 
   const personsToShow = filter
-    ? persons.filter(person =>
-        person.name.toLowerCase().startsWith(filter.toLowerCase())
-      )
+    ? persons.filter(p => p.name.toLowerCase().startsWith(filter.toLowerCase()))
     : persons
 
   return (
@@ -107,27 +98,16 @@ const App = () => {
 
       <div>
         Filter shown with:
-        <input 
-          value={filter}
-          onChange={handleFilterChange}
-        />
+        <input value={filter} onChange={handleFilterChange} />
       </div>
 
       <h2>Add new</h2>
       <form onSubmit={addPerson}>
         <div>
-          Name:
-          <input 
-            value={newName} 
-            onChange={handlePersonChange}
-          />
+          Name: <input value={newName} onChange={handlePersonChange} />
         </div>
         <div>
-          Number:
-          <input 
-            value={newNumber}
-            onChange={handleNumberChange}
-          />
+          Number: <input value={newNumber} onChange={handleNumberChange} />
         </div>
         <div>
           <button type="submit">Add</button>
@@ -137,11 +117,7 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
         {personsToShow.map(person => (
-          <Person 
-            key={person.id} 
-            person={person} 
-            handleDelete={del} 
-          />
+          <Person key={person.id} person={person} handleDelete={del} />
         ))}
       </ul>
     </div>
